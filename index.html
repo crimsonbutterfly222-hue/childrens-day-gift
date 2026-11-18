@@ -643,7 +643,7 @@ canvas#confetti{position:fixed;inset:0;pointer-events:none;z-index:50}
     <div class="ed-sec">
       <h3>نقل البيانات لجهاز آخر</h3>
       <textarea class="t" id="ioBox" placeholder="الصقي البيانات هنا…" style="min-height:80px;font-size:12px;direction:ltr"></textarea>
-      <div class="mini-btns"><button id="copyData">نسخ البيانات</button><button id="importData">استيراد</button><button class="del" id="resetData">إعادة الأصل</button></div>
+      <div class="mini-btns"><button id="copyText" style="background:#5454AF;color:#fff">📋 نسخ الأسماء والأوصاف (بدون صور)</button><button id="copyData">نسخ البيانات</button><button id="importData">استيراد</button><button class="del" id="resetData">إعادة الأصل</button></div>
     </div>
   </div>
   <div class="ed-foot"><button class="btn violet" id="edSave">حفظ ✨</button></div>
@@ -1323,6 +1323,11 @@ $('edSave').onclick=()=>{FIELDS.forEach(f=>data[f]=$('e-'+f).value.trim());data.
   data.kids.forEach(k=>{if(!k.msg.trim())k.msg=`${k.name}، ${G(k,'أنتِ نجمة','أنت نجم')} يضيء فصلنا. كل عام ${G(k,'وأنتِ','وأنت')} بخير!`;});
   if(save())toast('تم الحفظ ✓');SPACE_LOGO='';refreshLogo();$('editor').classList.remove('show');renderStatic();buildScenes();seek(0);$('pOverlay').classList.remove('hide');$('bigPlay').textContent='▶';$('pOvText').textContent='شغّلوا الهدية';};
 $('copyData').onclick=async()=>{const s=JSON.stringify(data);$('ioBox').value=s;$('ioBox').select();try{await navigator.clipboard.writeText(s);toast('تم النسخ ✓');}catch(e){toast('حدّدي النص وانسخيه يدويًا');}};
+$('copyText').onclick=async()=>{let ks=null;
+  ['rowadGift_v1',KEY].forEach(key=>{if(ks)return;try{const d=JSON.parse(localStorage.getItem(key)||'null');if(d&&d.kids&&d.kids.length)ks=d.kids;}catch(e){}});
+  ks=ks||data.kids;const txt=ks.map((k,i)=>`${i+1}. ${k.name||'—'} | ${k.g==='f'?'بنت':'ولد'} | ${k.title||''} | ${k.emoji||''} | ${k.trait||''} | ${k.msg||''}`).join('\n');
+  $('ioBox').value=txt;$('ioBox').style.direction='rtl';$('ioBox').style.minHeight='220px';
+  try{await navigator.clipboard.writeText(txt);toast('✓ تم النسخ — الصقيه في المحادثة');}catch(e){$('ioBox').select();toast('حدّدي النص في المربع وانسخيه');}};
 $('importData').onclick=()=>{try{const d=JSON.parse($('ioBox').value);if(!d.kids)throw 0;data=d;data.sample=false;save();SPACE_LOGO='';refreshLogo();openEditor();toast('تم الاستيراد ✓');}catch(e){toast('البيانات غير صحيحة');}};
 $('resetData').onclick=function(){if(!this.dataset.sure){this.dataset.sure=1;this.textContent='اضغطي مجددًا للتأكيد';return;}
   data=JSON.parse(JSON.stringify(BASE));try{localStorage.removeItem(KEY)}catch(e){}openEditor();delete this.dataset.sure;this.textContent='إعادة الأصل';};
