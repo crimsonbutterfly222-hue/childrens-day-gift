@@ -758,10 +758,13 @@ $('soundBtn').onclick=()=>{soundOn=!soundOn;$('soundBtn').textContent=soundOn?'�
 
 /* background song: «أوبريت يوم الطفل العالمي» on loop */
 let SONGS=[];
+const IOS=/iPad|iPhone|iPod/.test(navigator.userAgent)||(navigator.platform==='MacIntel'&&navigator.maxTouchPoints>1);
+// if the song didn't start on the fingerprint, start it on the next tap anywhere
+document.addEventListener('pointerdown',()=>{try{if(soundOn&&SONGS.length&&!BGM.started){ctx();bgUnlock();setTimeout(()=>bgApply(1.2),250);}}catch(e){}},true);
 const BGM={els:[],gains:[],cur:0,started:false,fading:false,target:.55,duck:false};
 function bgInit(){if(BGM.els.length)return;const a=ctx();
   SONGS.forEach(([src],i)=>{const e=new Audio(src);e.preload='auto';if(SONGS.length===1)e.loop=true;let g=null;
-    try{if(a){const n=a.createMediaElementSource(e);g=a.createGain();g.gain.value=0;n.connect(g);g.connect(a.destination);}}catch(err){g=null;}
+    try{if(a&&!IOS){const n=a.createMediaElementSource(e);g=a.createGain();g.gain.value=0;n.connect(g);g.connect(a.destination);}}catch(err){g=null;}
     if(!g)e.volume=0;BGM.els.push(e);BGM.gains.push(g);e.addEventListener('timeupdate',()=>bgCheck(i));e.addEventListener('ended',()=>{if(i===BGM.cur&&!BGM.fading)bgNext(1);});});}
 function bgGain(i,v,t){const g=BGM.gains[i],e=BGM.els[i];if(!e)return;
   if(g&&actx){const now=actx.currentTime;g.gain.cancelScheduledValues(now);g.gain.setValueAtTime(g.gain.value,now);g.gain.linearRampToValueAtTime(v,now+t);}
